@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+      .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+      h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+      .upload-section { margin-bottom: 30px; padding: 15px; background: #e8f4fd; border-radius: 5px; }
+      button { background: #3498db; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+      button:hover { background: #2980b9; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+      th { background-color: #f8f9fa; }
+      .status { font-size: 0.9em; color: #7f8c8d; margin-top: 5px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Zewpol Cloud</h1>
+      
+      <div class="upload-section">
+        <h3>Upload to Cloud</h3>
+        <input type="file" id="fileInput">
+        <button onclick="uploadToZewpol()">Upload</button>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div id="fileList">
+        <h3>Your Files</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Load files on startup
+      window.onload = loadFiles;
+
+      function loadFiles() {
+        google.script.run.withSuccessHandler(showFiles).getFiles();
+      }
+
+      function showFiles(files) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        files.forEach(file => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${file.name}</td>
+              <td>${file.size}</td>
+              <td><a href="${file.url}" target="_blank">View</a></td>
+            </tr>`;
+        });
+      }
+
+      function uploadToZewpol() {
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        if (fileInput.files.length === 0) return alert("Select a file!");
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        status.innerText = "Uploading...";
+        
+        reader.onload = function(e) {
+          const data = e.target.result;
+          google.script.run.withSuccessHandler(res => {
+            status.innerText = res;
+            loadFiles(); // Refresh list
+          }).uploadFile(data, file.name);
+        };
+        reader.readAsDataURL(file);
+      }
+    </script>
+    <script src='https://www.noupe.com/embed/019d79bc09a176c4ab2aae59c5fc5f320ace.js'></script>
+  </body>
+</html>
