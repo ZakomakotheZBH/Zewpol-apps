@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zewpol Arcade | Neural Play</title>
+  <style>
+    :root {
+      --acc: #00f260;
+      --bg: #000000;
+      --card: rgba(255, 255, 255, 0.06);
+      --glass: blur(20px);
+    }
+
+    body {
+      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: #fff; overflow-x: hidden;
+    }
+
+    /* Premium Header */
+    .header {
+      padding: 40px 5% 20px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .header h1 { margin: 0; font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+    .header span { color: var(--acc); }
+
+    /* Hero Section */
+    .hero {
+      margin: 0 5% 40px; height: 350px;
+      background: linear-gradient(135deg, #1a1a3a 0%, #0575e6 100%);
+      border-radius: 30px; position: relative; overflow: hidden;
+      display: flex; align-items: flex-end; padding: 40px; box-sizing: border-box;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .hero-content h2 { margin: 0; font-size: 2rem; }
+    .hero-content p { opacity: 0.8; margin: 10px 0 20px; max-width: 400px; }
+
+    /* Game Grid */
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px; padding: 0 5%; margin-bottom: 100px;
+    }
+
+    .game-card {
+      background: var(--card); border-radius: 24px; padding: 20px;
+      display: flex; align-items: center; gap: 15px;
+      transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+      text-decoration: none; color: inherit; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .game-card:hover {
+      background: rgba(255,255,255,0.12); transform: scale(1.03);
+    }
+
+    .icon-sq {
+      width: 70px; height: 70px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: bold;
+    }
+
+    /* Buttons */
+    .btn-play {
+      background: #fff; color: #000; padding: 10px 25px;
+      border-radius: 20px; font-weight: 700; text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-btn {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.1); backdrop-filter: var(--glass);
+      padding: 12px 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; text-decoration: none; font-weight: 600; font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Arcade<span>.</span></h1>
+  <div style="width:40px; height:40px; background:var(--card); border-radius:50%; border:1px solid var(--acc);"></div>
+</div>
+
+<div class="hero" onclick="location.href='zewpolgame2.html'" style="cursor:pointer">
+  <div class="hero-content">
+    <div style="background:var(--acc); color:#000; padding:4px 12px; border-radius:10px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:15px;">FEATURED</div>
+    <h2>ZewBlock 2D</h2>
+    <p>Mine, build, and survive in the infinite neural-generated landscape.</p>
+    <div class="btn-play">PLAY NOW</div>
+  </div>
+</div>
+
+<div class="grid">
+  <a href="zewpolgame1.html" class="game-card">
+    <div class="icon-sq" style="background: linear-gradient(#538d4e, #2e5e2b);">W</div>
+    <div>
+      <div style="font-weight:700">Zewwordle</div>
+      <div style="font-size:0.8rem; opacity:0.5">Neural Linguistics</div>
+    </div>
+  </a>
+
+  <a href="zewpolgame2.html" class="game-card">
+    <div class="icon-sq" style="background: linear-gradient(#4d2e1e, #228b22);">B</div>
+    <div>
+      <div style="font-weight:700">ZewBlock 2D</div>
+      <div style="font-size:0.8rem; opacity:0.5">Sandbox Adventure</div>
+    </div>
+  </a>
+
+  <div class="game-card" style="opacity:0.4; cursor:default">
+    <div class="icon-sq" style="background: #333;">?</div>
+    <div>
+      <div style="font-weight:700">ZewRacer</div>
+      <div style="font-size:0.8rem; opacity:0.5">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<a href="index.html" class="back-btn">EXIT ARCADE</a>
+
+</body>
+</html>

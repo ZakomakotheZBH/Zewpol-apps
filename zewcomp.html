@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zewpol Virtual Compute | ISO Simulator</title>
+  <style>
+    :root {
+      --accent: #00f260;
+      --secondary: #0575e6;
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text: #ffffff;
+      --bg: #050505;
+    }
+
+    body {
+      margin: 0; font-family: "JetBrains Mono", monospace;
+      background: var(--bg); color: var(--text);
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      height: 60px; padding: 0 25px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid var(--glass-border);
+      z-index: 100;
+    }
+
+    .brand { font-weight: 900; color: var(--accent); letter-spacing: 2px; }
+
+    /* Terminal/Monitor Area */
+    #monitor {
+      flex: 1; background: #000; margin: 20px;
+      border: 10px solid #1a1a1a; border-radius: 15px;
+      box-shadow: inset 0 0 100px rgba(0, 242, 96, 0.05), 0 0 30px rgba(0,0,0,0.5);
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    /* Boot & UI Screens */
+    .screen { position: absolute; inset: 0; display: none; padding: 40px; }
+    .screen.active { display: block; }
+    
+    #boot-log { color: var(--accent); font-size: 0.85rem; line-height: 1.6; overflow-y: auto; }
+
+    /* Control Panel */
+    .controls {
+      background: var(--glass); margin: 0 20px 20px; padding: 20px;
+      border-radius: 15px; border: 1px solid var(--glass-border);
+      display: flex; gap: 20px; align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+      padding: 10px; color: var(--accent); border-radius: 5px; outline: none;
+    }
+
+    .btn {
+      padding: 10px 20px; border-radius: 8px; font-weight: bold;
+      cursor: pointer; border: none; transition: 0.3s;
+    }
+    .btn-mount { background: var(--accent); color: #000; }
+    .btn-power { background: #ff4b2b; color: #fff; }
+
+    /* Simulated Desktop Styles */
+    .desktop {
+      background-size: cover; background-position: center;
+      display: flex; flex-direction: column;
+    }
+    .taskbar {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+      display: flex; align-items: center; padding: 0 15px; gap: 15px;
+    }
+    .os-icon { width: 30px; height: 30px; background: var(--accent); border-radius: 5px; }
+
+    .btn-secondary { 
+      background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); 
+      color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">ZEWPOL // COMPUTE-NODE</div>
+  <a href="index.html" class="btn-secondary">SHUTDOWN & EXIT</a>
+</div>
+
+<div id="monitor">
+  <div id="off-screen" class="screen active" style="display: flex; align-items: center; justify-content: center; background: #000;">
+    <div style="text-align: center; opacity: 0.5;">
+      <i class="fa-solid fa-power-off" style="font-size: 3rem; margin-bottom: 10px;"></i>
+      <p>SYSTEM OFFLINE. MOUNT ISO TO BEGIN.</p>
+    </div>
+  </div>
+
+  <div id="boot-screen" class="screen">
+    <div id="boot-log"></div>
+  </div>
+
+  <div id="desktop-screen" class="screen desktop">
+    <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; width: fit-content;">
+      <h2 id="os-title">Virtual OS</h2>
+      <p>Kernel Version: 5.10.0-ZEWPOL</p>
+      <p>Memory: 8192MB Virtual RAM</p>
+      <hr style="border-color: var(--glass-border);">
+      <p>> System initialized successfully.</p>
+    </div>
+    <div class="taskbar">
+      <div class="os-icon"></div>
+      <div style="font-size: 0.8rem;">Start</div>
+      <div style="margin-left: auto; font-size: 0.8rem;" id="clock">00:00</div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <input type="text" id="iso-path" placeholder="Enter Virtual ISO Name (e.g. windows.iso, kali.iso, zewpol.iso)...">
+  <button class="btn btn-mount" onclick="comp.powerOn()">MOUNT & BOOT</button>
+  <button class="btn btn-power" onclick="comp.powerOff()">FORCE SHUTDOWN</button>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+  const comp = {
+    isBooting: false,
+    
+    powerOn: function() {
+      const iso = document.getElementById('iso-path').value || "generic.iso";
+      if (this.isBooting) return;
+      
+      this.isBooting = true;
+      this.switchScreen('boot-screen');
+      const log = document.getElementById('boot-log');
+      log.innerHTML = "";
+      
+      const lines = [
+        `[ 0.000] Initializing Zewpol Virtual BIOS v4.2...`,
+        `[ 0.452] Checking Virtual RAM: 8192MB OK`,
+        `[ 1.102] Mounting media from: ${iso}`,
+        `[ 1.890] Loading Bootloader (GRUB)...`,
+        `[ 2.500] Decompressing Kernel...`,
+        `[ 3.120] Starting system services...`,
+        `[ 4.500] Initializing Neural GUI Environment...`,
+        `[ 5.200] Entering User Segment...`
+      ];
+
+      let i = 0;
+      const interval = setInterval(() => {
+        const p = document.createElement('div');
+        p.innerText = lines[i];
+        log.appendChild(p);
+        i++;
+        if (i >= lines.length) {
+          clearInterval(interval);
+          setTimeout(() => this.showDesktop(iso), 800);
+        }
+      }, 400);
+    },
+
+    showDesktop: function(iso) {
+      this.isBooting = false;
+      this.switchScreen('desktop-screen');
+      const desktop = document.getElementById('desktop-screen');
+      const title = document.getElementById('os-title');
+      
+      // Theme changes based on ISO name
+      if(iso.toLowerCase().includes('win')) {
+        desktop.style.backgroundImage = "url('https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=2000')";
+        title.innerText = "Windows Virtual Environment";
+      } else if(iso.toLowerCase().includes('kali') || iso.toLowerCase().includes('linux')) {
+        desktop.style.backgroundImage = "url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2000')";
+        title.innerText = "Linux Neural Kernel";
+      } else {
+        desktop.style.backgroundImage = "url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000')";
+        title.innerText = "ZewpolOS Segment";
+      }
+    },
+
+    powerOff: function() {
+      this.isBooting = false;
+      this.switchScreen('off-screen');
+      document.getElementById('iso-path').value = "";
+    },
+
+    switchScreen: function(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+  };
+
+  // Simple Clock
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+  }, 1000);
+</script>
+</body>
+</html>

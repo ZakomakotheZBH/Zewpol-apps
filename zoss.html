@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOSS | Git Streamer</title>
+  <style>
+    :root { --acc: #00f260; --bg: #0d1117; --gl: rgba(255,255,255,0.05); }
+    body { margin:0; font-family:sans-serif; background:var(--bg); color:#c9d1d9; display:flex; flex-direction:column; height:100vh; }
+    
+    .nav { padding:15px; background:#161b22; display:flex; gap:10px; border-bottom:1px solid #30363d; align-items:center; }
+    .nav input { flex:1; background:#010409; border:1px solid #30363d; padding:8px 12px; color:#fff; border-radius:6px; outline:none; }
+    
+    .main { flex:1; display:grid; grid-template-columns: 300px 1fr; overflow:hidden; }
+    
+    /* File Tree */
+    #tree { background:#0d1117; border-right:1px solid #30363d; overflow-y:auto; padding:10px; font-size:0.85rem; }
+    .file { padding:6px; cursor:pointer; border-radius:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .file:hover { background:var(--gl); color:var(--acc); }
+    
+    /* Code Viewer */
+    #viewer { background:#010409; overflow:auto; padding:20px; font-family:monospace; white-space:pre; font-size:0.85rem; color:#e6edf3; }
+    
+    .btn { background:#238636; color:#fff; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .back { text-decoration:none; color:8b949e; font-size:0.8rem; margin-right:10px; }
+    .loading { color:var(--acc); padding:20px; text-align:center; }
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html" class="back">← EXIT</a>
+  <b style="color:var(--acc)">ZOSS</b>
+  <input type="text" id="repo" placeholder="username/repo (e.g. facebook/react)" onkeypress="if(event.key==='Enter') zoss.fetch()">
+  <button class="btn" onclick="zoss.fetch()">STREAM</button>
+</div>
+
+<div class="main">
+  <div id="tree"><div style="opacity:0.5; padding:20px;">Enter repo path to stream Git data...</div></div>
+  <div id="viewer">Select a file to view neural source...</div>
+</div>
+
+<script>
+const zoss = {
+  repo: '',
+  
+  fetch: async function() {
+    const input = document.getElementById('repo').value.trim();
+    if(!input || !input.includes('/')) return alert("Use format: user/repo");
+    
+    this.repo = input;
+    const treeDiv = document.getElementById('tree');
+    treeDiv.innerHTML = '<div class="loading">Fetching Repository...</div>';
+    
+    try {
+      const res = await fetch(`https://api.github.com/repos/${input}/contents`);
+      const files = await res.json();
+      
+      if(files.message === "Not Found") throw "Repo not found";
+      
+      treeDiv.innerHTML = files.map(f => `
+        <div class="file" onclick="zoss.view('${f.path}', '${f.download_url}')">
+          ${f.type === 'dir' ? '📁' : '📄'} ${f.name}
+        </div>
+      `).join('');
+    } catch(e) {
+      treeDiv.innerHTML = `<div style="color:#ff4b2b; padding:20px;">Error: ${e}</div>`;
+    }
+  },
+
+  view: async function(path, url) {
+    if(url === 'null') return alert("Directories cannot be streamed directly.");
+    
+    const view = document.getElementById('viewer');
+    view.innerHTML = '<div class="loading">Streaming Content...</div>';
+    
+    try {
+      const res = await fetch(url);
+      const code = await res.text();
+      // Simple sanitization for HTML viewing
+      view.innerText = code;
+    } catch(e) {
+      view.innerText = "Error loading file content.";
+    }
+  }
+};
+</script>
+
+</body>
+</html>

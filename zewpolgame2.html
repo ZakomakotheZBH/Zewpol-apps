@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZewBlock 2D | Neural Sandbox</title>
+  <style>
+    :root { --acc: #00f260; --sky: #0a0a1a; }
+    body { margin:0; background:#000; color:#fff; font-family:monospace; overflow:hidden; display:flex; flex-direction:column; height:100vh; }
+    .nav { padding:10px; background:#111; display:flex; justify-content:space-between; border-bottom:1px solid #333; }
+    canvas { flex:1; cursor: crosshair; image-rendering: pixelated; }
+    .stats { position:absolute; top:60px; left:20px; background:rgba(0,0,0,0.7); padding:10px; pointer-events:none; border-left:3px solid var(--acc); }
+    .controls-hint { position:absolute; bottom:20px; left:20px; font-size:0.7rem; opacity:0.6; }
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <span><a href="index.html" style="color:#666; text-decoration:none">← EXIT</a> &nbsp; <b>ZEWBLOCK 2D</b></span>
+  <span id="inv">Holding: DIRT</span>
+</div>
+
+<div class="stats">
+  X: <span id="px">0</span> | Y: <span id="py">0</span><br>
+  WORLD: NEURAL_SEED_404
+</div>
+
+<div class="controls-hint">AD: Move | SPACE: Jump | CLICK: Mine/Place | 1-3: Switch Block</div>
+
+<canvas id="g"></canvas>
+
+<script>
+const c = document.getElementById('g');
+const ctx = c.getContext('2d');
+const blocks = { 0:null, 1:'#4d2e1e', 2:'#228b22', 3:'#808080' }; // Air, Dirt, Grass, Stone
+const blockNames = ["AIR", "DIRT", "GRASS", "STONE"];
+
+let world = [];
+let tw = 40, ts = 32; // Tile width/size
+let p = { x: 500, y: 100, vx: 0, vy: 0, w: 20, h: 30, selected: 1 };
+
+function init() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    
+    // Generate Terrain
+    for(let x=0; x<tw; x++) {
+        world[x] = [];
+        let surface = Math.floor(Math.random() * 5) + 8;
+        for(let y=0; y<25; y++) {
+            if(y > surface) world[x][y] = (y > surface + 4) ? 3 : 1;
+            else if(y == surface) world[x][y] = 2;
+            else world[x][y] = 0;
+        }
+    }
+    loop();
+}
+
+let keys = {};
+window.onkeydown = (e) => { keys[e.code] = true; if(e.key <= 3) p.selected = parseInt(e.key); };
+window.onkeyup = (e) => keys[e.code] = false;
+
+c.onmousedown = (e) => {
+    let gx = Math.floor((e.clientX + p.x - c.width/2) / ts);
+    let gy = Math.floor(e.clientY / ts);
+    if(world[gx] && world[gx][gy] !== undefined) {
+        world[gx][gy] = world[gx][gy] === 0 ? p.selected : 0;
+    }
+};
+
+function loop() {
+    // Physics
+    if(keys['KeyA']) p.vx -= 0.5;
+    if(keys['KeyD']) p.vx += 0.5;
+    if(keys['Space'] && p.grounded) p.vy = -8;
+    
+    p.vy += 0.4; // Gravity
+    p.vx *= 0.9; // Friction
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Basic Collision
+    let tx = Math.floor(p.x / ts);
+    let ty = Math.floor((p.y + p.h) / ts);
+    p.grounded = false;
+    if(world[tx] && world[tx][ty] > 0) {
+        p.y = ty * ts - p.h;
+        p.vy = 0;
+        p.grounded = true;
+    }
+
+    draw();
+    requestAnimationFrame(loop);
+}
+
+function draw() {
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0,0,c.width,c.height);
+
+    // Camera follow
+    ctx.save();
+    ctx.translate(-p.x + c.width/2, 0);
+
+    // Draw World
+    for(let x=0; x<tw; x++) {
+        for(let y=0; y<25; y++) {
+            if(world[x][y] > 0) {
+                ctx.fillStyle = blocks[world[x][y]];
+                ctx.fillRect(x*ts, y*ts, ts-1, ts-1);
+            }
+        }
+    }
+
+    // Draw Player
+    ctx.fillStyle = '#00f260';
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.restore();
+
+    document.getElementById('px').innerText = Math.round(p.x);
+    document.getElementById('py').innerText = Math.round(p.y);
+    document.getElementById('inv').innerText = "Holding: " + blockNames[p.selected];
+}
+
+window.onload = init;
+</script>
+</body>
+</html>

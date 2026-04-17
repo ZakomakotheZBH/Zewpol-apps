@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zewpol Forms | Neural Data Intake</title>
+  <style>
+    :root { --acc: #00f260; --bg: #0b091e; --gl: rgba(255,255,255,0.08); }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .nav { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); border-bottom: 1px solid var(--gl); }
+    .brand { color: var(--acc); font-weight: 900; letter-spacing: 1px; }
+
+    .container { max-width: 600px; margin: 40px auto; padding: 30px; background: var(--gl); border-radius: 20px; border: 1px solid var(--gl); }
+    
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--acc); margin-bottom: 8px; letter-spacing: 1px; }
+    input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid var(--gl); border-radius: 8px; color: #fff; outline: none; box-sizing: border-box; }
+    input:focus { border-color: var(--acc); }
+
+    .btn { width: 100%; padding: 15px; background: var(--acc); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn:hover { transform: scale(1.02); opacity: 0.9; }
+
+    #output { margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; font-family: monospace; font-size: 0.8rem; display: none; word-break: break-all; border: 1px dashed var(--acc); }
+    .back { color: #fff; text-decoration: none; font-size: 0.8rem; opacity: 0.6; }
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="brand">ZEWPOL // FORMS</div>
+  <a href="index.html" class="back">EXIT FORM</a>
+</div>
+
+<div class="container">
+  <h2 style="margin-top:0">Data Submission Node</h2>
+  <p style="opacity:0.6; font-size:0.9rem; margin-bottom:30px">Enter information to generate an encrypted data packet.</p>
+
+  <div class="field">
+    <label>Submission Title</label>
+    <input type="text" id="title" placeholder="e.g. System Log 01">
+  </div>
+
+  <div class="field">
+    <label>Data Category</label>
+    <select id="cat">
+      <option value="intel">Intelligence</option>
+      <option value="dev">Development</option>
+      <option value="personal">Personal Archive</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Detailed Intel</label>
+    <textarea id="intel" rows="5" placeholder="Enter multi-line data here..."></textarea>
+  </div>
+
+  <button class="btn" onclick="forms.generate()">GENERATE NEURAL PACKET</button>
+
+  <div id="output"></div>
+</div>
+
+<script>
+const forms = {
+  generate: function() {
+    const t = document.getElementById('title').value;
+    const c = document.getElementById('cat').value;
+    const i = document.getElementById('intel').value;
+    
+    if(!t || !i) return alert("Fields incomplete.");
+
+    const data = { title: t, category: c, content: i, timestamp: new Date().toISOString() };
+    const packet = btoa(JSON.stringify(data)); // Simple Base64 "Encryption"
+    
+    const out = document.getElementById('output');
+    out.style.display = 'block';
+    out.innerHTML = `<span style="color:var(--acc)">PACKET GENERATED:</span><br><br>${packet}<br><br><span style="opacity:0.5">Copy this string to your Zewpol Notes or Cloud.</span>`;
+  }
+};
+</script>
+
+</body>
+</html>

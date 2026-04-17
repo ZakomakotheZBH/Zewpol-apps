@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevCollab | Neural Workspace</title>
+  <style>
+    :root { --acc: #00f260; --bg: #0d0b21; --gl: rgba(255,255,255,0.05); }
+    body { margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#fff; display:flex; height:100vh; }
+    
+    /* Sidebar */
+    .side { width:240px; background:rgba(0,0,0,0.4); border-right:1px solid var(--gl); padding:20px; display:flex; flex-direction:column; }
+    .status { font-size:0.7rem; color:var(--acc); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px; }
+    
+    /* Main Area */
+    .main { flex:1; display:flex; flex-direction:column; }
+    .nav { padding:15px 25px; border-bottom:1px solid var(--gl); display:flex; justify-content:space-between; align-items:center; }
+    
+    .editor { flex:1; padding:20px; background:#050505; color:var(--acc); border:none; outline:none; font-family:'JetBrains Mono',monospace; font-size:0.9rem; resize:none; line-height:1.6; }
+    
+    .btn { background:var(--acc); color:#000; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.8rem; }
+    .btn-sec { background:var(--gl); color:#fff; border:1px solid var(--gl); padding:8px 15px; border-radius:6px; cursor:pointer; font-size:0.8rem; text-decoration:none; }
+    
+    .user-list { flex:1; margin-top:20px; }
+    .user { font-size:0.85rem; padding:8px 0; opacity:0.7; border-bottom:1px solid var(--gl); }
+    .user::before { content:'●'; color:var(--acc); margin-right:8px; }
+  </style>
+</head>
+<body>
+
+<div class="side">
+  <div class="status">● Node Active</div>
+  <h3 style="margin:0 0 20px 0; font-size:1rem">Collaborators</h3>
+  <div class="user-list" id="users">
+    <div class="user">You (Host)</div>
+    <div class="user" style="opacity:0.3">Awaiting peers...</div>
+  </div>
+  <button class="btn" onclick="collab.share()">GENERATE LINK</button>
+</div>
+
+<div class="main">
+  <div class="nav">
+    <div style="font-weight:900">DEVCOLLAB // WORKSPACE</div>
+    <a href="index.html" class="btn-sec">TERMINATE</a>
+  </div>
+  <textarea class="editor" id="pad" placeholder="// Initialize collaborative script here..."></textarea>
+</div>
+
+<script>
+const collab = {
+  id: Math.random().toString(36).substr(2, 9),
+  
+  init: function() {
+    // Load local cache if exists
+    const local = localStorage.getItem('zew_collab_cache');
+    if(local) document.getElementById('pad').value = local;
+    
+    // Auto-save logic
+    document.getElementById('pad').addEventListener('input', (e) => {
+      localStorage.setItem('zew_collab_cache', e.target.value);
+    });
+  },
+
+  share: function() {
+    const url = window.location.href + '?session=' + this.id;
+    navigator.clipboard.writeText(url);
+    alert("Session Link Copied! Send this to a peer to sync segments.");
+  }
+};
+
+window.onload = () => collab.init();
+</script>
+
+</body>
+</html>

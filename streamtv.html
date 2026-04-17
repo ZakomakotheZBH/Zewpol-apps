@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zewpol Stream | Neural Media Feed</title>
+  <style>
+    :root {
+      --accent: #00f260;
+      --secondary: #0575e6;
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text: #ffffff;
+      --panel-bg: rgba(10, 8, 30, 0.98);
+    }
+
+    body {
+      margin: 0; font-family: "Inter", -apple-system, sans-serif;
+      background: #0b091e; color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Top Navigation */
+    .top-bar {
+      height: 70px; padding: 0 25px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .brand {
+      font-weight: 900; font-size: 1.5rem;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+    /* Video Stage */
+    .video-stage {
+      background: #000; border-radius: 24px; border: 1px solid var(--glass-border);
+      aspect-ratio: 16 / 9; overflow: hidden; position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .video-stage video, .video-stage iframe {
+      width: 100%; height: 100%; border: none;
+    }
+
+    .placeholder-msg {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      background: linear-gradient(45deg, #0f0c29, #000);
+    }
+
+    /* Controls & Input */
+    .stream-controls {
+      margin-top: 25px; background: var(--glass);
+      padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);
+      display: flex; gap: 15px;
+    }
+
+    .stream-controls input {
+      flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+      padding: 12px 20px; border-radius: 12px; color: white; outline: none;
+    }
+
+    /* Buttons */
+    .btn-action { 
+      background: linear-gradient(90deg, var(--accent), var(--secondary)); 
+      border: none; padding: 12px 25px; border-radius: 12px; 
+      color: white; font-weight: bold; cursor: pointer;
+    }
+
+    .btn-secondary { 
+      background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); 
+      color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; text-decoration: none;
+    }
+
+    /* Library */
+    .library-section { margin-top: 40px; }
+    .library-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px; margin-top: 20px;
+    }
+
+    .thumb-card {
+      background: var(--glass); border-radius: 15px; overflow: hidden;
+      border: 1px solid var(--glass-border); transition: 0.3s; cursor: pointer;
+    }
+
+    .thumb-card:hover { border-color: var(--accent); transform: scale(1.02); }
+    .thumb-img { height: 140px; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--accent); }
+    .thumb-info { padding: 15px; }
+    .thumb-info h4 { margin: 0; font-size: 0.95rem; }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">ZEWPOL STREAM</div>
+  <a href="index.html" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Search</a>
+</div>
+
+<div class="container">
+  <div class="video-stage" id="videoStage">
+    <div class="placeholder-msg" id="placeholder">
+      <i class="fa-solid fa-satellite-dish" style="font-size: 4rem; color: var(--accent); margin-bottom: 20px;"></i>
+      <h2>Signal Awaiting Broadcast</h2>
+      <p style="opacity: 0.6;">Enter a Neural Feed URL below to begin streaming.</p>
+    </div>
+  </div>
+
+  <div class="stream-controls">
+    <input type="text" id="streamUrl" placeholder="Enter Video URL (MP4) or YouTube Link...">
+    <button class="btn-action" onclick="stream.load()">INITIALIZE FEED</button>
+  </div>
+
+  <div class="library-section">
+    <h3 style="border-left: 3px solid var(--accent); padding-left: 15px;">Global Signal Library</h3>
+    <div class="library-grid">
+      <div class="thumb-card" onclick="stream.load('https://www.w3schools.com/html/mov_bbb.mp4')">
+        <div class="thumb-img"><i class="fa-solid fa-film"></i></div>
+        <div class="thumb-info"><h4>Big Buck Bunny [Test Feed]</h4><p style="font-size: 0.75rem; opacity: 0.5;">Local Segment MP4</p></div>
+      </div>
+      <div class="thumb-card" onclick="stream.load('https://www.youtube.com/embed/dQw4w9WgXcQ')">
+        <div class="thumb-img"><i class="fa-brands fa-youtube"></i></div>
+        <div class="thumb-info"><h4>Neural Encrypted Music</h4><p style="font-size: 0.75rem; opacity: 0.5;">YouTube Stream</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const stream = {
+    load: function(urlOverride) {
+      const input = document.getElementById('streamUrl');
+      let url = urlOverride || input.value.trim();
+      if (!url) return;
+
+      const stage = document.getElementById('videoStage');
+      
+      // Clear stage
+      stage.innerHTML = '';
+
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        // Handle YouTube Links (convert to embed if necessary)
+        let videoId = "";
+        if(url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
+        else if(url.includes('embed/')) videoId = url.split('embed/')[1];
+        else videoId = url.split('/').pop();
+        
+        stage.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+      } else {
+        // Handle direct video files
+        stage.innerHTML = `<video controls autoplay><source src="${url}" type="video/mp4">Your signal receiver is outdated.</video>`;
+      }
+
+      if(!urlOverride) input.value = '';
+    }
+  };
+</script>
+
+</body>
+</html>

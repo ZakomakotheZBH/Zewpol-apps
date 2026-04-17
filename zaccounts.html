@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZewAccounts | Identity Node</title>
+  <style>
+    :root { --acc: #00f260; --bg: #050505; --gl: rgba(255,255,255,0.05); }
+    body { margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    
+    .card { width:100%; max-width:400px; background:rgba(255,255,255,0.02); border:1px solid var(--gl); border-radius:30px; padding:40px; box-sizing:border-box; text-align:center; position:relative; }
+    
+    /* Profile Avatar */
+    .avatar-circle { width:100px; height:100px; border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:bold; color:#000; transition:0.3s; }
+    
+    input { width:100%; background:#111; border:1px solid var(--gl); padding:12px; border-radius:10px; color:#fff; text-align:center; outline:none; margin-bottom:20px; font-size:1rem; }
+    input:focus { border-color:var(--acc); }
+
+    .stat-row { display:flex; justify-content:space-between; font-size:0.8rem; margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; }
+    
+    .btn-save { background:var(--acc); color:#000; border:none; width:100%; padding:15px; border-radius:12px; font-weight:bold; cursor:pointer; }
+    .btn-exit { display:block; margin-top:20px; color:#666; text-decoration:none; font-size:0.8rem; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="avatar-circle" id="avatar" style="background:var(--acc);">Z</div>
+  <h2 style="margin-bottom:5px;">Neural Identity</h2>
+  <p style="opacity:0.5; font-size:0.8rem; margin-bottom:25px;">Manage your segment credentials</p>
+
+  <input type="text" id="username" placeholder="Enter Alias">
+  
+  <div style="margin-bottom:20px;">
+    <p style="font-size:0.7rem; color:var(--acc); text-transform:uppercase; margin-bottom:10px;">Security Metrics</p>
+    <div class="stat-row"><span>Status</span><span style="color:var(--acc)">VERIFIED</span></div>
+    <div class="stat-row"><span>Storage Used</span><span id="storage-perc">0%</span></div>
+  </div>
+
+  <button class="btn-save" onclick="acc.save()">UPDATE CORE PROFILE</button>
+  <a href="index.html" class="btn-exit">RETURN TO ENGINE</a>
+</div>
+
+<script>
+const acc = {
+  init: function() {
+    const name = localStorage.getItem('zew_user') || 'Guest';
+    const color = localStorage.getItem('zew_color') || '#00f260';
+    
+    document.getElementById('username').value = name;
+    this.updateUI(name, color);
+    this.calcStorage();
+  },
+
+  save: function() {
+    const name = document.getElementById('username').value;
+    // Generate a random color based on name length for fun
+    const colors = ['#00f260', '#0575e6', '#f7df1e', '#ff4b2b', '#8e44ad'];
+    const randomColor = colors[name.length % colors.length];
+    
+    localStorage.setItem('zew_user', name);
+    localStorage.setItem('zew_color', randomColor);
+    
+    this.updateUI(name, randomColor);
+    alert("Profile Synced to Local Node.");
+  },
+
+  updateUI: function(name, color) {
+    const av = document.getElementById('avatar');
+    av.innerText = name.charAt(0).toUpperCase();
+    av.style.background = color;
+  },
+
+  calcStorage: function() {
+    // Estimate LocalStorage usage for the "Cloud" and "Accounts"
+    let total = 0;
+    for (let x in localStorage) {
+      if (localStorage.hasOwnProperty(x)) {
+        total += ((localStorage[x].length + x.length) * 2);
+      }
+    }
+    // 5MB is typical limit
+    const perc = ((total / (5 * 1024 * 1024)) * 100).toFixed(2);
+    document.getElementById('storage-perc').innerText = perc + "%";
+  }
+};
+
+window.onload = () => acc.init();
+</script>
+
+</body>
+</html>

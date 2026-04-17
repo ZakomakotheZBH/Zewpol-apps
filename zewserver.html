@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZewServer | Network Monitor</title>
+  <style>
+    :root { --acc: #00f260; --bg: #050505; --gl: rgba(255,255,255,0.05); }
+    body { margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#fff; display:flex; flex-direction:column; height:100vh; }
+    
+    .header { padding:15px 25px; background:#000; border-bottom:1px solid var(--gl); display:flex; justify-content:space-between; align-items:center; }
+    .brand { color:var(--acc); font-weight:900; }
+
+    .grid { flex:1; display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 200px 1fr; gap:15px; padding:20px; }
+    
+    .panel { background:rgba(255,255,255,0.02); border:1px solid var(--gl); border-radius:12px; padding:20px; position:relative; overflow:hidden; }
+    .panel-h { font-size:0.7rem; text-transform:uppercase; color:var(--acc); margin-bottom:15px; letter-spacing:1px; }
+
+    /* Analytics Bars */
+    .bar-container { height:10px; background:#111; border-radius:5px; margin-top:10px; overflow:hidden; }
+    .bar { height:100%; background:var(--acc); width:0%; transition:0.5s; }
+
+    /* Traffic Log */
+    #traffic { font-family:monospace; font-size:0.8rem; height:200px; overflow-y:auto; color:#888; }
+    .log-entry { margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:2px; }
+    .status-ok { color:var(--acc); }
+
+    .btn { background:var(--acc); border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; }
+    .back { text-decoration:none; color:#666; font-size:0.8rem; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">ZEWSERVER // ANALYTICS</div>
+  <a href="index.html" class="back">DISCONNECT NODE</a>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-h">CPU Neural Load</div>
+    <div style="font-size:2rem; font-weight:bold;" id="cpu-val">0%</div>
+    <div class="bar-container"><div class="bar" id="cpu-bar"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">Network Throughput</div>
+    <div style="font-size:2rem; font-weight:bold;" id="net-val">0.0 Mb/s</div>
+    <div class="bar-container"><div class="bar" id="net-bar" style="background:#0575e6"></div></div>
+  </div>
+
+  <div class="panel" style="grid-column: span 2;">
+    <div class="panel-h">Global Traffic Stream</div>
+    <div id="traffic">Initializing network intercept...</div>
+  </div>
+</div>
+
+<script>
+const server = {
+  init: function() {
+    setInterval(this.updateStats, 2000);
+    setInterval(this.generateTraffic, 1500);
+  },
+
+  updateStats: function() {
+    const cpu = Math.floor(Math.random() * 40) + 10;
+    const net = (Math.random() * 100).toFixed(1);
+
+    document.getElementById('cpu-val').innerText = cpu + "%";
+    document.getElementById('cpu-bar').style.width = cpu + "%";
+    
+    document.getElementById('net-val').innerText = net + " Mb/s";
+    document.getElementById('net-bar').style.width = net + "%";
+  },
+
+  generateTraffic: function() {
+    const log = document.getElementById('traffic');
+    const ips = ['192.168.1.1', '10.0.0.42', '172.16.254.1', '8.8.8.8'];
+    const routes = ['/api/auth', '/v1/neural/stream', '/cloud/upload', '/sys/ping'];
+    
+    const ip = ips[Math.floor(Math.random() * ips.length)];
+    const route = routes[Math.floor(Math.random() * routes.length)];
+    const time = new Date().toLocaleTimeString();
+
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `[${time}] <span class="status-ok">GET 200</span> ${ip} <span style="color:#555">→</span> ${route}`;
+    
+    log.prepend(entry);
+    if(log.childNodes.length > 15) log.removeChild(log.lastChild);
+  }
+};
+
+window.onload = () => server.init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZewJS | Server Emulator</title>
+  <style>
+    :root { --acc: #f7df1e; --bg: #111; --gl: rgba(255,255,255,0.05); }
+    body { margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#fff; display:flex; flex-direction:column; height:100vh; }
+    
+    .nav { padding:15px; background:#000; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gl); }
+    .nav b { color:var(--acc); }
+
+    .workspace { flex:1; display:grid; grid-template-columns: 1fr 400px; }
+    
+    /* Code Editor */
+    #editor { background:#050505; color:#d4d4d4; padding:20px; font-family:'JetBrains Mono',monospace; border:none; outline:none; resize:none; font-size:0.9rem; border-right:1px solid var(--gl); }
+    
+    /* Server Console */
+    .console { background:#000; display:flex; flex-direction:column; }
+    .con-head { padding:10px; background:#1a1a1a; font-size:0.7rem; font-weight:bold; color:#888; text-transform:uppercase; }
+    #log { flex:1; padding:15px; font-family:monospace; font-size:0.8rem; overflow-y:auto; color:var(--acc); }
+    
+    .controls { padding:15px; background:rgba(0,0,0,0.5); display:flex; gap:10px; }
+    .btn { background:var(--acc); color:#000; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .btn-stop { background:#ff4b2b; color:#fff; }
+    .back { text-decoration:none; color:#666; font-size:0.8rem; }
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <span><a href="index.html" class="back">EXIT</a> &nbsp; <b>ZEWJS // NODE-SIM</b></span>
+  <span id="status" style="font-size:0.7rem; color:#666">STATUS: IDLE</span>
+</div>
+
+<div class="workspace">
+  <textarea id="editor" spellcheck="false">
+// ZewJS Server Simulation
+const server = {
+  port: 3000,
+  msg: "Hello from Zewpol Server!"
+};
+
+function start() {
+  console.log(`[INIT] Server running on port ${server.port}`);
+  console.log(`[DATA] Response: ${server.msg}`);
+}
+
+start();</textarea>
+
+  <div class="console">
+    <div class="con-head">System Output</div>
+    <div id="log">Ready to mount script...</div>
+    <div class="controls">
+      <button class="btn" onclick="zewjs.run()">DEPLOY</button>
+      <button class="btn btn-stop" onclick="zewjs.stop()">STOP</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const zewjs = {
+  run: function() {
+    const code = document.getElementById('editor').value;
+    const log = document.getElementById('log');
+    const status = document.getElementById('status');
+    
+    log.innerHTML = "Initializing virtual environment...<br>";
+    status.innerText = "STATUS: RUNNING";
+    status.style.color = "#00f260";
+
+    // Virtual Console Redirect
+    const oldLog = console.log;
+    console.log = function(m) {
+      log.innerHTML += `> ${m}<br>`;
+    };
+
+    try {
+      // Execute the JS code in a sandboxed-style evaluation
+      eval(code);
+    } catch (e) {
+      log.innerHTML += `<span style="color:#ff4b2b">RUNTIME_ERROR: ${e.message}</span><br>`;
+    }
+
+    // Restore original log
+    console.log = oldLog;
+  },
+
+  stop: function() {
+    document.getElementById('log').innerHTML = "Server process terminated.";
+    const status = document.getElementById('status');
+    status.innerText = "STATUS: IDLE";
+    status.style.color = "#666";
+  }
+};
+</script>
+
+</body>
+</html>

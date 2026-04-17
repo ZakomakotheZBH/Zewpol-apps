@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zewwordle | Neural Linguistics</title>
+  <style>
+    :root { --acc: #00f260; --bg: #050505; --err: #3a3a3c; --pos: #b59f3b; --cor: #538d4e; }
+    body { margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#fff; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+    
+    .nav { width:100%; padding:15px; background:#000; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; box-sizing:border-box; }
+    .nav b { color:var(--acc); letter-spacing:2px; }
+
+    #game { margin-top:40px; display:grid; grid-template-rows:repeat(6, 1fr); gap:5px; }
+    .row { display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; }
+    .tile { width:50px; height:50px; border:2px solid #3a3a3c; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold; text-transform:uppercase; transition:0.3s; }
+    
+    .correct { background:var(--cor); border-color:var(--cor); }
+    .present { background:var(--pos); border-color:var(--pos); }
+    .absent { background:var(--err); border-color:var(--err); }
+
+    .kb { margin-top:30px; display:flex; flex-direction:column; gap:5px; align-items:center; }
+    .kb-row { display:flex; gap:4px; }
+    .key { padding:12px; background:#818384; border-radius:4px; cursor:pointer; font-size:0.8rem; font-weight:bold; }
+    
+    .msg { margin-top:20px; color:var(--acc); font-weight:bold; height:20px; }
+    .back { color:#666; text-decoration:none; font-size:0.8rem; }
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="index.html" class="back">TERMINATE</a>
+  <b>ZEWWORDLE</b>
+  <span style="opacity:0">.</span>
+</div>
+
+<div class="msg" id="msg"></div>
+<div id="game"></div>
+
+<div class="kb" id="keyboard"></div>
+
+<script>
+const words = ["CLOUD", "NEURO", "LOGIC", "PROXY", "STORE", "BRAIN", "PATCH", "INPUT", "STAGE"];
+let target = words[Math.floor(Math.random() * words.length)];
+let currentGuess = "";
+let guesses = [];
+const maxGuesses = 6;
+
+const game = {
+  init() {
+    const board = document.getElementById('game');
+    for (let i = 0; i < maxGuesses; i++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      for (let j = 0; j < 5; j++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `tile-${i}-${j}`;
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+    this.createKB();
+    window.addEventListener('keydown', (e) => this.handleInput(e.key));
+  },
+
+  createKB() {
+    const keys = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+    const kb = document.getElementById('keyboard');
+    keys.forEach(rowStr => {
+      const row = document.createElement('div');
+      row.className = 'kb-row';
+      rowStr.split('').forEach(key => {
+        const k = document.createElement('div');
+        k.className = 'key';
+        k.innerText = key;
+        k.onclick = () => this.handleInput(key);
+        row.appendChild(k);
+      });
+      kb.appendChild(row);
+    });
+  },
+
+  handleInput(key) {
+    if (guesses.length >= maxGuesses) return;
+    if (key === 'Enter') this.submitGuess();
+    else if (key === 'Backspace') {
+      currentGuess = currentGuess.slice(0, -1);
+      this.updateBoard();
+    } else if (/^[a-zA-Z]$/.test(key) && currentGuess.length < 5) {
+      currentGuess += key.toUpperCase();
+      this.updateBoard();
+    }
+  },
+
+  updateBoard() {
+    const row = guesses.length;
+    for (let i = 0; i < 5; i++) {
+      const tile = document.getElementById(`tile-${row}-${i}`);
+      tile.innerText = currentGuess[i] || "";
+    }
+  },
+
+  submitGuess() {
+    if (currentGuess.length !== 5) return;
+    
+    const row = guesses.length;
+    let result = [];
+    for (let i = 0; i < 5; i++) {
+      const char = currentGuess[i];
+      const tile = document.getElementById(`tile-${row}-${i}`);
+      if (char === target[i]) {
+        tile.classList.add('correct');
+      } else if (target.includes(char)) {
+        tile.classList.add('present');
+      } else {
+        tile.classList.add('absent');
+      }
+    }
+
+    if (currentGuess === target) {
+      document.getElementById('msg').innerText = "NEURAL MATCH FOUND!";
+    } else if (guesses.length === 5) {
+      document.getElementById('msg').innerText = "SIGNAL LOST: " + target;
+    }
+    
+    guesses.push(currentGuess);
+    currentGuess = "";
+  }
+};
+
+window.onload = () => game.init();
+</script>
+
+</body>
+</html>

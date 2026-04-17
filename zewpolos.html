@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZewpolOS | Neural Interface</title>
+  <style>
+    :root {
+      --acc: #00f260;
+      --bg: #050714;
+      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      margin: 0; font-family: 'Segoe UI', sans-serif;
+      background: var(--bg); color: #fff;
+      height: 100vh; overflow: hidden;
+      background-image: radial-gradient(circle at 50% 50%, #1a1a3a 0%, #050714 100%);
+    }
+
+    /* Desktop Icons */
+    .desktop {
+      padding: 20px; display: grid;
+      grid-template-columns: repeat(auto-fill, 80px);
+      grid-auto-rows: 90px; gap: 20px;
+    }
+    .icon {
+      text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;
+    }
+    .icon:hover { background: var(--glass); }
+    .icon-box { 
+      width: 40px; height: 40px; background: var(--acc); margin: 0 auto 8px; 
+      border-radius: 8px; box-shadow: 0 0 15px rgba(0,242,96,0.3);
+      display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000;
+    }
+    .icon-label { font-size: 0.75rem; text-shadow: 1px 1px 3px #000; }
+
+    /* Taskbar */
+    .taskbar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 45px;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+      border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 10px; z-index: 1000;
+    }
+    .start-btn {
+      width: 35px; height: 35px; background: var(--acc); border-radius: 5px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Window System */
+    .window {
+      position: absolute; top: 100px; left: 100px; width: 400px; height: 300px;
+      background: #111; border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: none; flex-direction: column;
+    }
+    .win-head {
+      padding: 10px; background: #1a1a1a; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; cursor: move;
+    }
+    .close { color: #ff4b2b; cursor: pointer; font-weight: bold; }
+    .win-body { padding: 15px; flex: 1; font-size: 0.9rem; }
+
+    /* Start Menu */
+    .start-menu {
+      position: fixed; bottom: 50px; left: 10px; width: 250px;
+      background: #000; border: 1px solid var(--border); border-radius: 10px;
+      padding: 15px; display: none; z-index: 1001;
+    }
+    .start-item { padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 5px; }
+    .start-item:hover { background: var(--acc); color: #000; }
+
+    #clock { margin-left: auto; font-size: 0.8rem; padding-right: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="desktop">
+  <div class="icon" onclick="os.open('term')">
+    <div class="icon-box">>_</div>
+    <div class="icon-label">Terminal</div>
+  </div>
+  <div class="icon" onclick="os.open('sys')">
+    <div class="icon-box">i</div>
+    <div class="icon-label">System</div>
+  </div>
+  <div class="icon" onclick="location.href='index.html'">
+    <div class="icon-box">E</div>
+    <div class="icon-label">Exit</div>
+  </div>
+</div>
+
+<div id="term" class="window">
+  <div class="win-head"><span>Zewpol Terminal</span><span class="close" onclick="os.close('term')">×</span></div>
+  <div class="win-body" style="font-family:monospace; color:var(--acc)">
+    ZewpolOS Neural Kernel v1.0.4<br>
+    Ready for input...<br><br>
+    > _
+  </div>
+</div>
+
+<div id="sys" class="window">
+  <div class="win-head"><span>System Registry</span><span class="close" onclick="os.close('sys')">×</span></div>
+  <div class="win-body">
+    <b>OS:</b> ZewpolOS (Neural Stream)<br>
+    <b>RAM:</b> 16GB Virtual Allocated<br>
+    <b>Node:</b> Localized Segment<br><br>
+    <button style="background:var(--acc); border:none; padding:5px 10px; border-radius:3px" onclick="alert('Update Check: System is current')">Check Updates</button>
+  </div>
+</div>
+
+<div class="start-menu" id="start">
+  <div class="start-item" onclick="location.href='superweb5.html'">SuperWeb Browser</div>
+  <div class="start-item" onclick="location.href='zewai.html'">ZewAI Assistant</div>
+  <div class="start-item" onclick="location.href='zewpolcloud.html'">Cloud Files</div>
+  <hr style="opacity:0.2">
+  <div class="start-item" onclick="location.reload()">Restart</div>
+</div>
+
+<div class="taskbar">
+  <div class="start-btn" onclick="os.toggleStart()">Z</div>
+  <div id="clock">00:00:00</div>
+</div>
+
+<script>
+const os = {
+  open: (id) => document.getElementById(id).style.display = 'flex',
+  close: (id) => document.getElementById(id).style.display = 'none',
+  toggleStart: () => {
+    const s = document.getElementById('start');
+    s.style.display = s.style.display === 'block' ? 'none' : 'block';
+  }
+};
+
+// Clock Logic
+setInterval(() => {
+  document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
+
+// Dragging Logic (Simple)
+document.querySelectorAll('.win-head').forEach(header => {
+  header.onmousedown = (e) => {
+    let win = header.parentElement;
+    let ox = e.clientX - win.offsetLeft;
+    let oy = e.clientY - win.offsetTop;
+    document.onmousemove = (e) => {
+      win.style.left = (e.clientX - ox) + 'px';
+      win.style.top = (e.clientY - oy) + 'px';
+    };
+    document.onmouseup = () => document.onmousemove = null;
+  };
+});
+</script>
+
+</body>
+</html>
